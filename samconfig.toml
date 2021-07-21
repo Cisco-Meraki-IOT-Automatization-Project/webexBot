@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "Bot"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-5bdsfa3t3l1c"
+s3_prefix = "Bot"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"

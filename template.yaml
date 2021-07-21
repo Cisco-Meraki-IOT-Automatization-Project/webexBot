@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  meraki_project
+
+  Sample SAM Template for meraki_project
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  InfoCredentials:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: InfoCredentials
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  InfoSensors:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: InfoSensors
+      AttributeDefinitions:
+        - AttributeName: idSensor
+          AttributeType: S
+      KeySchema:
+        - AttributeName: idSensor
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  LayerChat:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: LayerChat
+      Description: Dependencies for lambda chatbot
+      ContentUri: LayerChat/
+    Metadata:
+      BuildMethod: makefile
+      LicenseInfo: 'MIT'
+      CompatibleRuntimes:
+        - python3.7
+  ChatBot:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdaMerakiChat/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Layers:
+        - !Ref LayerChat
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "*"
+      Events:
+        RootEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        WebHookWebexEvent:
+          Type: Api
+          Properties:
+            Path: /WebHookWebex
+            Method: post
+        WebHookMerakiEvent:
+          Type: Api
+          Properties:
+            Path: /WebHookMeraki
+            Method: post
+        AdminEvent:
+          Type: Api
+          Properties:
+            Path: /Admin
+            Method: post
+Outputs:
+  Api:
+    Description: "API Gateway endpoint URL for Prod stage for function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/v0/"
+  ChatBot:
+    Description: "Lambda Function ARN for Chatbot"
+    Value: !GetAtt ChatBot.Arn
+  ChatBotFunctionIamRole:
+    Description: "Implicit IAM Role created for Siesvi function"
+    Value: !GetAtt ChatBotRole.Arn

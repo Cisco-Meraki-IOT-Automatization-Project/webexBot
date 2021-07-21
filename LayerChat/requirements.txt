@@ -1,0 +1,8 @@
+boto3
+requests
+tplink-cloud-api
+flask-lambda-python36
+configparser
+meraki
+datetime
+requests-toolbelt
